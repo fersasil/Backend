@@ -1,15 +1,22 @@
 package main
 
 import (
-	_ "github.com/fersasil/backend_ca/app/routes"
 	"github.com/gorilla/mux"
+	"backend_ca/app/routes"
+	"net/http"
+	"fmt"
 )
 
 func main() {
 
 	r := mux.NewRouter()
 
-	route.addSignHandler(r)
+	routes.AddSignHandler(r)
+
+	// http.Handle("/", r)
+	err := http.ListenAndServe(":3000", r)
+
+	fmt.Println(err)
 
 	// r.HandleFunc("/", HomeHandler)
 

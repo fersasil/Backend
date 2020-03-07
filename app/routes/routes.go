@@ -1,4 +1,4 @@
-package route
+package routes
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func addSignHandler(r *mux.Router) {
+func AddSignHandler(r *mux.Router) {
 	r.HandleFunc("/signup", signupGetHandler).Methods("GET")
 	// r.HandleFunc("/signup", signupPostHandler).Methods("POST")
 	// r.HandleFunc("/signin", signinGetHandler).Methods("GET")
