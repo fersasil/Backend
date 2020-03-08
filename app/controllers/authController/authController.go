@@ -8,14 +8,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 // Returns ...
 type Returns struct {
-	Title       string
+	Message     string
 	Status      int
 	Description string
+	userID      string
 }
 
 func sendUnauthorizedError(w http.ResponseWriter, statusCode int) {
@@ -85,17 +87,20 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	// If user is in use
 	if usermodel.UserIsInUse(createUser.Username) {
-		errors = append(errors, Returns{Title: "Username: `" + createUser.Username + "` is already in use.", Status: 409, Description: "Someone is using this user."})
+		errors = append(errors, Returns{Message: "Username: `" + createUser.Username + "` is already in use.", Status: 409, Description: "Someone is using this user."})
+		w.WriteHeader(http.StatusConflict)
 	}
 
 	// If email is Valid
 	if EmailIsValid(createUser.Email) {
 		// Verify if email already is in database
 		if usermodel.EmailIsInUse(createUser.Email) {
-			errors = append(errors, Returns{Title: "Email: `" + createUser.Email + "` is already in use.", Status: 409, Description: "Someone is using this email."})
+			errors = append(errors, Returns{Message: "Email: `" + createUser.Email + "` is already in use.", Status: 409, Description: "Someone is using this email."})
+			w.WriteHeader(http.StatusConflict)
 		}
 	} else {
-		errors = append(errors, Returns{Title: "Email: `" + createUser.Email + "` isn't a valid email.", Status: 400, Description: "Verify if you typed your email address correctly."})
+		errors = append(errors, Returns{Message: "Email: `" + createUser.Email + "` isn't a valid email.", Status: 400, Description: "Verify if you typed your email address correctly."})
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	if IsStrongPassword(createUser.Password) {
@@ -104,14 +109,18 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		hash.Write([]byte(createUser.Password))
 		createUser.Password = hex.EncodeToString(hash.Sum(nil))
 	} else {
-		errors = append(errors, Returns{Title: "Password Invalid", Status: 417, Description: "Password need have at least one uppercase and on lowercase letter and a number, and need have 8 characters"})
+		errors = append(errors, Returns{Message: "Password Invalid", Status: 417, Description: "Password need have at least one uppercase and on lowercase letter and a number, and need have 8 characters"})
+		w.WriteHeader(http.StatusExpectationFailed)
 	}
 
 	if errors == nil {
-		if usermodel.CreateUser(createUser.Username, createUser.Name, createUser.Password, createUser.Email) {
-			errors = append(errors, Returns{Title: "Succefully User Created.", Status: 201, Description: "User was created succefully"})
+		userID, status := usermodel.CreateUser(createUser.Username, createUser.Name, createUser.Password, createUser.Email)
+		if status {
+			errors = append(errors, Returns{Message: "Succefully User Created.", userID: strconv.FormatInt(userID, 10), Status: 201, Description: "User was created succefully"})
+			w.WriteHeader(http.StatusCreated)
 		} else {
-			errors = append(errors, Returns{Title: "User create fail.", Status: 500, Description: "Something gones wrong on data insert in database."})
+			errors = append(errors, Returns{Message: "User create fail.", Status: 500, Description: "Something gones wrong on data insert in database."})
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		JSON, _ := json.MarshalIndent(errors, "", "\t")
 		w.Write(JSON)

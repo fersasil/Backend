@@ -29,6 +29,7 @@ func (u User) SignIn(username string, password string) (string, bool) {
 	sqlStatement := `SELECT id FROM user WHERE user.username=? and password = ?;`
 
 	row := db.QueryRow(sqlStatement, username, hashedPassword)
+	defer db.Close()
 
 	var userID string
 
@@ -47,7 +48,7 @@ func UserIsInUse(username string) bool {
 	connectionDB := dbHelper.ConnectDatabase()
 	sqlStatement := `SELECT username FROM user WHERE user.username=?;`
 	row := connectionDB.QueryRow(sqlStatement, username)
-	connectionDB.Close()
+	defer connectionDB.Close()
 	err := row.Scan(&user.Username)
 	switch err {
 	case sql.ErrNoRows:
@@ -66,7 +67,7 @@ func EmailIsInUse(email string) bool {
 	connectionDB := dbHelper.ConnectDatabase()
 	sqlStatement := `SELECT email FROM user WHERE user.email=?;`
 	row := connectionDB.QueryRow(sqlStatement, email)
-	connectionDB.Close()
+	defer connectionDB.Close()
 	err := row.Scan(&user.Email)
 	switch err {
 	case sql.ErrNoRows:
@@ -80,15 +81,25 @@ func EmailIsInUse(email string) bool {
 }
 
 // CreateUser ...
-func CreateUser(username, name, password, email string) bool {
+func CreateUser(username, name, password, email string) (int64, bool) {
 	connectionDB := dbHelper.ConnectDatabase()
 	insForm, err := connectionDB.Prepare("INSERT INTO user (username, name, password, email) VALUES (?, ?, ?, ?);")
 	if err != nil {
 		panic(err.Error())
-		connectionDB.Close()
-		return false
 	}
-	insForm.Exec(username, name, password, email)
-	connectionDB.Close()
-	return true
+	id, err := insForm.Exec(username, name, password, email)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	returnID, err := id.LastInsertId()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer connectionDB.Close()
+
+	return returnID, true
 }
