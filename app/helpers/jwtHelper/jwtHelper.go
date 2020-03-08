@@ -11,6 +11,7 @@ const secretJWT = "ASDJADHASDKFHADS"
 // Create the JWT key used to create the signature
 var jwtKey = []byte(secretJWT)
 
+// CreateJWT ...
 func CreateJWT(userID string, duration int) (string, bool) {
 
 	// expation time
@@ -35,6 +36,7 @@ func CreateJWT(userID string, duration int) (string, bool) {
 	return tokenString, true
 }
 
+// DecodeJWT ...
 func DecodeJWT(stringJWT string) (string, bool) {
 	claims := &jwt.StandardClaims{}
 
