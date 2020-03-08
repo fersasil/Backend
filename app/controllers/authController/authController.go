@@ -1,61 +1,74 @@
 package authcontroller
 
 import (
-	usermodel "backend_ca/app/models/user"
+	jwt "backend_ca/app/helpers/jwtHelper"
+	usermodel "backend_ca/app/models/userModel"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"regexp"
-
-	"github.com/dgrijalva/jwt-go"
+	"strings"
 )
 
-var users = map[string]string{
-	"user1": "password1",
-	"user2": "password2",
-}
-
-type Credentials struct {
-	Username string `json:"password"`
-	Password string `json:"username"`
-}
-
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
+// Returns ...
 type Returns struct {
 	Title       string
 	Status      int
 	Description string
 }
 
-const secretJWT = "ASDJADHASDKFHADS"
+func sendUnauthorizedError(w http.ResponseWriter, statusCode int) {
+	res := make(map[string]string)
 
-// SigninHandler ...
-func SigninHandler(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	var creds Credentials
-
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	res["error"] = "User or password wrong"
+	resJSON, err := json.Marshal(res)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	expectedPassword, ok := users[creds.Username]
-	fmt.Println(expectedPassword, ok)
+	w.WriteHeader(statusCode)
+	w.Write(resJSON)
+}
 
-	return
-	os.Exit(0)
+//SigninHandler ...
+func SigninHandler(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
 
-	w.WriteHeader(http.StatusOK)
-	// fmt.Fprintf(w, "Category: %v\n", vars["category"])
+	if queryParams["username"] == nil || queryParams["password"] == nil {
+		sendUnauthorizedError(w, http.StatusUnauthorized)
+		return
+	}
+
+	var u usermodel.User
+
+	//convert []string to string
+	password := strings.Join(queryParams["password"], " ")
+	username := strings.Join(queryParams["username"], " ")
+
+	userID, ok := u.SignIn(username, password)
+
+	if !ok {
+		sendUnauthorizedError(w, http.StatusUnauthorized)
+		return
+	}
+
+	token, ok := jwt.CreateJWT(userID, 60)
+
+	res := make(map[string]string)
+
+	res["token"] = token
+
+	resJSON, err := json.Marshal(res)
+
+	if err != nil {
+		sendUnauthorizedError(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(resJSON)
 }
 
 // SignupHandler ...
