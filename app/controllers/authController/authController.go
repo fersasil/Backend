@@ -1,52 +1,62 @@
 package authcontroller
 
 import (
+	jwt "backend_ca/app/helpers/jwtHelper"
+	user "backend_ca/app/models/userModel"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
-
-	"github.com/dgrijalva/jwt-go"
+	"strings"
 )
 
-var users = map[string]string{
-	"user1": "password1",
-	"user2": "password2",
-}
+func sendUnauthorizedError(w http.ResponseWriter, statusCode int) {
+	res := make(map[string]string)
 
-type Credentials struct {
-	Username string `json:"password"`
-	Password string `json:"username`
-}
-
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
-const secretJWT = "ASDJADHASDKFHADS"
-
-func SigninHandler(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
-	var creds Credentials
-
-	err := json.NewDecoder(r.Body).Decode(&creds)
+	res["error"] = "User or password wrong"
+	resJSON, err := json.Marshal(res)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	expectedPassword, ok := users[creds.Username]
-	fmt.Println(expectedPassword, ok)
-
-	return
-	os.Exit(0)
-
-	w.WriteHeader(http.StatusOK)
-	// fmt.Fprintf(w, "Category: %v\n", vars["category"])
+	w.WriteHeader(statusCode)
+	w.Write(resJSON)
 }
 
-// func createJWT(string userId) {
-// 	jwtKey := []byte(secretJWT)
-// }
+//SigninHandler ...
+func SigninHandler(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+
+	if queryParams["username"] == nil || queryParams["password"] == nil {
+		sendUnauthorizedError(w, http.StatusUnauthorized)
+		return
+	}
+
+	var u user.User
+
+	//convert []string to string
+	password := strings.Join(queryParams["password"], " ")
+	username := strings.Join(queryParams["username"], " ")
+
+	userID, ok := u.SignIn(username, password)
+
+	if !ok {
+		sendUnauthorizedError(w, http.StatusUnauthorized)
+		return
+	}
+
+	token, ok := jwt.CreateJWT(userID, 60)
+
+	res := make(map[string]string)
+
+	res["token"] = token
+
+	resJSON, err := json.Marshal(res)
+
+	if err != nil {
+		sendUnauthorizedError(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(resJSON)
+}
