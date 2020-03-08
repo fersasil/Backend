@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"backend_ca/app/routes"
-	"net/http"
 	"fmt"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {

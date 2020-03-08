@@ -1,6 +1,7 @@
 package routes
 
 import (
+	authcontroller "backend_ca/app/controllers/authController"
 	"fmt"
 	"net/http"
 
@@ -8,8 +9,8 @@ import (
 )
 
 func AddSignHandler(r *mux.Router) {
-	r.HandleFunc("/signup", signupGetHandler).Methods("GET")
-	// r.HandleFunc("/signup", signupPostHandler).Methods("POST")
+	r.HandleFunc("/signup", signupGetHandler).Methods("POST")
+	r.HandleFunc("/signin", authcontroller.SigninHandler).Methods("GET")
 	// r.HandleFunc("/signin", signinGetHandler).Methods("GET")
 	// r.HandleFunc("/signin", signinPostHandler).Methods("POST")
 	// r.HandleFunc("/signout", signoutGetHandler).Methods("GET")

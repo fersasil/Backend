@@ -1,10 +1,8 @@
-package usermodel;
+package usermodel
 
 type User struct {
-	name string,
-	idUser unsigned int,
-	password string,
-	email string
+	name     string
+	idUser   int
+	password string
+	email    string
 }
-
-
