@@ -80,15 +80,25 @@ func EmailIsInUse(email string) bool {
 }
 
 // CreateUser ...
-func CreateUser(username, name, password, email string) bool {
+func CreateUser(username, name, password, email string) (int64, bool) {
 	connectionDB := dbHelper.ConnectDatabase()
 	insForm, err := connectionDB.Prepare("INSERT INTO user (username, name, password, email) VALUES (?, ?, ?, ?);")
 	if err != nil {
 		panic(err.Error())
-		connectionDB.Close()
-		return false
 	}
-	insForm.Exec(username, name, password, email)
-	connectionDB.Close()
-	return true
+	id, err := insForm.Exec(username, name, password, email)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	returnID, err := id.LastInsertId()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer connectionDB.Close()
+
+	return returnID, true
 }
