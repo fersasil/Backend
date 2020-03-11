@@ -1,3 +1,11 @@
+# Ignore files without extension
+# Ignore all
+*
+# Uniginore files with extension
+!*.*
+# Uniginore dir
+!*/
+
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node
