@@ -8,5 +8,5 @@ This repository was created to store the backend of CACC UFFS site and app.
 
 ## Authors ##
 
-[Guilherme Sabino](https://github.com/fersasil)
-[Ruan Pato](https://github.com/ruanpato)
+- [Guilherme Sabino](https://github.com/fersasil)
+- [Ruan Pato](https://github.com/ruanpato)
