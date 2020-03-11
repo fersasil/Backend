@@ -17,7 +17,7 @@ type Returns struct {
 	Message     string
 	Status      int
 	Description string
-	userID      string
+	UserID      string
 }
 
 func sendUnauthorizedError(w http.ResponseWriter, statusCode int) {
@@ -116,7 +116,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if errors == nil {
 		userID, status := usermodel.CreateUser(createUser.Username, createUser.Name, createUser.Password, createUser.Email)
 		if status {
-			errors = append(errors, Returns{Message: "Succefully User Created.", userID: strconv.FormatInt(userID, 10), Status: 201, Description: "User was created succefully"})
+			errors = append(errors, Returns{Message: "Succefully User Created.", UserID: strconv.FormatInt(userID, 10), Status: 201, Description: "User was created succefully"})
 			w.WriteHeader(http.StatusCreated)
 		} else {
 			errors = append(errors, Returns{Message: "User create fail.", Status: 500, Description: "Something gones wrong on data insert in database."})

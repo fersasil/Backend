@@ -29,7 +29,6 @@ func (u User) SignIn(username string, password string) (string, bool) {
 	sqlStatement := `SELECT id FROM user WHERE user.username=? and password = ?;`
 
 	row := db.QueryRow(sqlStatement, username, hashedPassword)
-	defer db.Close()
 
 	var userID string
 
@@ -48,7 +47,7 @@ func UserIsInUse(username string) bool {
 	connectionDB := dbHelper.ConnectDatabase()
 	sqlStatement := `SELECT username FROM user WHERE user.username=?;`
 	row := connectionDB.QueryRow(sqlStatement, username)
-	defer connectionDB.Close()
+	connectionDB.Close()
 	err := row.Scan(&user.Username)
 	switch err {
 	case sql.ErrNoRows:
@@ -67,7 +66,7 @@ func EmailIsInUse(email string) bool {
 	connectionDB := dbHelper.ConnectDatabase()
 	sqlStatement := `SELECT email FROM user WHERE user.email=?;`
 	row := connectionDB.QueryRow(sqlStatement, email)
-	defer connectionDB.Close()
+	connectionDB.Close()
 	err := row.Scan(&user.Email)
 	switch err {
 	case sql.ErrNoRows:
