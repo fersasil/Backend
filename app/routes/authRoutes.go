@@ -8,12 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/*
-	@Funcion:
-	@Arguments:
-	@Returns:
-	@Description:
-*/
+// AddSignHandler create routes using mux
 func AddSignHandler(r *mux.Router) {
 	r.HandleFunc("/signup", authcontroller.SignupHandler).Methods("POST")
 	r.HandleFunc("/signin", authcontroller.SigninHandler).Methods("GET")
@@ -22,12 +17,7 @@ func AddSignHandler(r *mux.Router) {
 	// r.HandleFunc("/signout", signoutGetHandler).Methods("GET")
 }
 
-/*
-	@Funcion:
-	@Arguments:
-	@Returns:
-	@Description:
-*/
+// signupGetHandler Internal method
 func signupGetHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	w.WriteHeader(http.StatusOK)

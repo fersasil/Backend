@@ -59,6 +59,21 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, ok := jwt.CreateJWT(userID, 60)
 
+	if !ok {
+		res := make(map[string]string)
+
+		res["error"] = "User or password wrong"
+		resJSON, err := json.Marshal(res)
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(500)
+		w.Write(resJSON)
+	}
+
 	res := make(map[string]string)
 
 	res["token"] = token
