@@ -137,12 +137,22 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 			errors = append(errors, Returns{Message: "User create fail.", Status: 500, Description: "Something gones wrong on data insert in database."})
 			w.WriteHeader(http.StatusInternalServerError)
 		}
-		JSON, _ := json.MarshalIndent(errors, "", "\t")
+		JSON, err := json.MarshalIndent(errors, "", "\t")
+
+		if err != nil {
+			panic(err.Error())
+		}
+
 		w.Write(JSON)
 		return
 	}
 
 	JSON, err := json.MarshalIndent(errors, "", "\t")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
 	w.Write(JSON)
 }
 
